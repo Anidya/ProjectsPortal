@@ -21,6 +21,10 @@ class AdminDashboard extends Component{
                 {   name: "", email: "" },
                 {   name: "", email: "" }
             ],
+            fields: {
+                title: "",
+                description: ""
+            },
             error: "",
             open: false
         }
@@ -83,14 +87,14 @@ class AdminDashboard extends Component{
 
     clickSubmit = (event) => {
         event.preventDefault();
-        const {id, mentor, students, supervisors} = this.state
+        const {id, mentor, students, supervisors, fields} = this.state
         const group = {
             id: id,
             mentor: mentor,
             students: students,
-            supervisors: supervisors 
+            supervisors: supervisors,
+            fields: fields
         }
-        console.log(group);
         createGroup(group)
             .then(data => {
                 if (data.error) this.setState({ error: data.error })
@@ -112,7 +116,7 @@ class AdminDashboard extends Component{
                         {   name: "", email: "" },
                         {   name: "", email: "" }
                     ]
-            });
+                });
         });
     };
     

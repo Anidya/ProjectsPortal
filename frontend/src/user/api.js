@@ -8,7 +8,6 @@ export const list = () => {
     .catch(err => console.log(err));
 }
 
-
 export const load = (groupId) => {
     return fetch(`${process.env.REACT_APP_API_URL}/getgroup/${groupId}` , {
         method: "GET"
@@ -19,19 +18,16 @@ export const load = (groupId) => {
     .catch(err => console.log(err));
 }
 
-
-
-export const addField = (field, groupId) => {
-    return fetch(`${process.env.REACT_APP_API_URL}/addField/${groupId}` , {
-        method: "POST",
+export const updateDetails = (groupId, group) => {
+    return fetch(`${process.env.REACT_APP_API_URL}/updategroup/${groupId}` , {
+        method: "PUT",
         headers: {
             Accept: "application/json",
             "Content-type": "application/json"
         },
-        body: JSON.stringify({field: ""})
+        body: JSON.stringify(group)
     })
     .then(response => {
-        console.log(response);
         return response.json();
     })
     .catch(err => console.log(err));

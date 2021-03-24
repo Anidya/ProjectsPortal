@@ -1,6 +1,7 @@
 const Group = require('../models/group');
 const Teacher = require('../models/teacher');
 const Student = require('../models/student');
+const lodash = require('lodash');
 
 exports.groupById = (req,res,next,id) => {
     Group.findById(id)
@@ -24,7 +25,6 @@ exports.getOneGroup = (req,res) => {
     //console.log(req.groupDetails);
     return res.json(req.groupDetails);
 }
-
 
 exports.createGroup = (req,res) => {
 
@@ -61,4 +61,15 @@ exports.createGroup = (req,res) => {
 
         res.json( {group: result})
     });
+}
+
+exports.updateGroup = (req,res) => {
+    var group = req.groupDetails;
+    group = lodash.extend(group, req.body);
+    group.save( (err) => {
+        if(err)
+            return res.status(400).json({error: err});
+        res.json(group);
+    });
+
 }

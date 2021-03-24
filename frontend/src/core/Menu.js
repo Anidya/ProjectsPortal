@@ -11,9 +11,9 @@ const isActive = (history, path) => {
 }
 
 const Menu = ({history}) => (
-    <div className="sticky-top" style={{width: "100%"}}>
+    <div className="sticky-top">
         { isAuthenticated() && (
-            <nav className="navbar navbar-expand-lg navbar-light bg-light" >
+            <nav className="navbar navbar-expand-lg navbar-light bg-light" style={{width: "100%"}}>
                 <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span className="navbar-toggler-icon"></span>
                 </button>
