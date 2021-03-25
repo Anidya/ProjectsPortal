@@ -27,8 +27,8 @@ var groupSchema = new mongoose.Schema({
     },
 
     deadlines: {
-        title: {type: Boolean},
-        description: {type: Boolean}
+        title: {type: String},
+        description: {type: String}
     }
 
 });

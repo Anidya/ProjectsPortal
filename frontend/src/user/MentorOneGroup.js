@@ -12,10 +12,13 @@ class MentorOneGroup extends Component{
                 mentor: { name: "", email: "" }, 
                 students: [{ name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }],
                 supervisors: [{ name: "", email: "" }, { name: "", email: "" }],
-                fields: { title: "", description: "" }
+                fields: { title: "", description: "" },
+                deadlines: { title: "", description: "" }
             },
             current: "",
-            show: false
+            show: false,
+            date: "",
+            time: "",
         }
     }
 
@@ -41,15 +44,28 @@ class MentorOneGroup extends Component{
         })
     }
 
-    dialog = () => (
+    setDate = str => (event) => {
+        this.setState({
+            [str]: event.target.value
+        })
+    } 
+
+    dialog = (date, time) => (
         (this.state.show && <div className="modal">
             <section className="modal-main">
                 <p style={{textAlign: 'center', fontWeight:'bold', fontSize: "20px"}}>Assign Task</p>
                 <p style={{fontWeight: 'bold'}}> Set A Deadline</p>
-                <p>Choose a time</p>
-                <p>Choose a date</p>
-                <button onClick={this.closeDialog}>Close</button>
-                <button onClick={this.assignTask}>Assign</button>
+                <div className="row ml-5 mt-4">
+                    <p style={{width: "50%"}}>Choose a date</p>
+                    <input 
+                        name = "date"
+                        type = "date"
+                        value = {date}
+                        onChange = {this.setDate("date")}>
+                    </input>
+                </div>
+                <button className="randombutton ml-5" onClick={this.closeDialog}>Close</button>
+                <button className="randombutton" onClick={this.assignTask}>Assign</button>
             </section>
 
         </div>)
@@ -126,15 +142,23 @@ class MentorOneGroup extends Component{
     )
 
     closeDialog = () => {
-        this.setState({ show: false });
+        this.setState({ 
+            show: false,
+            date: ""
+        });
     };
 
     assignTask = () => {
-        const {groupId, group, current} = this.state;
-        this.setState({ show: false});
+        const {groupId, group, current, date} = this.state;
 
-        if(current === "title")   group.fields.title = "--- PROJECT DETAILS NOT UPLOADED ---";
-        if(current === "description")   group.fields.description = "--- PROJECT DETAILS NOT UPLOADED ---";
+        if(current === "title"){
+            group.fields.title = "--- PROJECT DETAILS NOT UPLOADED ---";
+            group.deadlines.title = date;
+        }
+        if(current === "description"){
+            group.fields.description = "--- PROJECT DETAILS NOT UPLOADED ---";
+            group.deadlines.description = date;
+        }
 
         this.setState({
             group
@@ -142,15 +166,23 @@ class MentorOneGroup extends Component{
 
         updateDetails(groupId, group)
         .then(data => {
+            console.log("data",data);
             if(data.error)
                 console.log({"Error": data.error});
             else
                 this.setState({group: data});
         })
+
+        this.setState({ 
+            show: false,
+            date: ""
+        });
     }
 
+
+
     render() {
-        const {group, current, show} = this.state
+        const {group, current, show, date, time} = this.state
         return (
             <div className="row">
                 
@@ -161,7 +193,7 @@ class MentorOneGroup extends Component{
                 <div className="jumbotron" style={{marginLeft: "20%", width: "80%", height: "100%"}}>
                     {this.mainGroupDetails(group)}
                     {this.displayFromSidebar(group, current)}
-                    {show && this.dialog()}
+                    {show && this.dialog(date, time)}
                 </div>
             </div>
         )
