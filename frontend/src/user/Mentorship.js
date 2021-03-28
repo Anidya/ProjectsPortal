@@ -3,7 +3,7 @@ import {list} from './api'
 import {isAuthenticated} from '../auth'
 import {Link} from 'react-router-dom'
 
-class MentorGroups extends Component{
+class Mentorship extends Component{
     constructor(){
         super()
         this.state = {
@@ -51,4 +51,4 @@ class MentorGroups extends Component{
         )
     }
 }
-export default MentorGroups;
+export default Mentorship;

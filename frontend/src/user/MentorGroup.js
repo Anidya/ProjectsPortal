@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { load, updateDetails } from './api'
 import '../design/app.css'
 
-class MentorOneGroup extends Component{
+class MentorGroup extends Component{
     constructor(){
         super()
         this.state = {
@@ -12,8 +12,8 @@ class MentorOneGroup extends Component{
                 mentor: { name: "", email: "" }, 
                 students: [{ name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }],
                 supervisors: [{ name: "", email: "" }, { name: "", email: "" }],
-                fields: { title: "", description: "" },
-                deadlines: { title: "", description: "" }
+                fields: { title: "", description: "", photo: ""},
+                deadlines: { title: "", description: "", photo: ""}
             },
             current: "",
             show: false,
@@ -50,7 +50,7 @@ class MentorOneGroup extends Component{
         })
     } 
 
-    dialog = (date, time) => (
+    dialog = (date) => (
         (this.state.show && <div className="modal">
             <section className="modal-main">
                 <p style={{textAlign: 'center', fontWeight:'bold', fontSize: "20px"}}>Assign Task</p>
@@ -77,7 +77,7 @@ class MentorOneGroup extends Component{
                 <hr className = "line"/>
                 
                 { group.fields.title !== "" && <button className = "button" value="title" onClick={ (event) => this.handleClick(event, false)}> Title </button> }
-                { group.fields.description  && <button className = "button" value="description" onClick={ (event) => this.handleClick(event, false)}>Description</button> }
+                { group.fields.description !== ""  && <button className = "button" value="description" onClick={ (event) => this.handleClick(event, false)}>Description</button> }
                 
                 <hr style={{backgroundColor: "black"}}/>
                 
@@ -85,7 +85,7 @@ class MentorOneGroup extends Component{
                 <hr className = "line"/>
                 
                 { group.fields.title === "" && <button className = "button" value="title" onClick= { (event) => this.handleClick(event, true)}> Title </button> }
-                { group.fields.description ==="" && <button className = "button" value="description" onClick={ (event) => this.handleClick(event, true)}>Description</button> }
+                { group.fields.description === "" && <button className = "button" value="description" onClick={ (event) => this.handleClick(event, true)}>Description</button> }
                 
                 <hr style={{backgroundColor: "black"}}/>
             </div>
@@ -166,7 +166,6 @@ class MentorOneGroup extends Component{
 
         updateDetails(groupId, group)
         .then(data => {
-            console.log("data",data);
             if(data.error)
                 console.log({"Error": data.error});
             else
@@ -178,11 +177,9 @@ class MentorOneGroup extends Component{
             date: ""
         });
     }
-
-
-
+    
     render() {
-        const {group, current, show, date, time} = this.state
+        const {group, current, show, date} = this.state
         return (
             <div className="row">
                 
@@ -193,10 +190,10 @@ class MentorOneGroup extends Component{
                 <div className="jumbotron" style={{marginLeft: "20%", width: "80%", height: "100%"}}>
                     {this.mainGroupDetails(group)}
                     {this.displayFromSidebar(group, current)}
-                    {show && this.dialog(date, time)}
+                    {show && this.dialog(date)}
                 </div>
             </div>
         )
     }
 }
-export default MentorOneGroup;
+export default MentorGroup;

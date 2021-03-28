@@ -19,7 +19,6 @@ export const load = (groupId) => {
 }
 
 export const updateDetails = (groupId, group) => {
-    console.log("group",group);
     return fetch(`${process.env.REACT_APP_API_URL}/updategroup/${groupId}` , {
         method: "PUT",
         headers: {

@@ -33,27 +33,27 @@ exports.createGroup = (req,res) => {
     group.save()
     .then( result => {
 
-        Teacher.findOneAndUpdate(
-            {email: mentor.email}, 
-            {$push: {'mentorgroup': group._id}}, 
-            {new: true})
-        .then(result);
+        // Teacher.findOneAndUpdate(
+        //     {email: mentor.email}, 
+        //     {$push: {'mentorgroup': group._id}}, 
+        //     {new: true})
+        // .then(result);
 
-        for(var i=0; i<supervisors.length; i++){
-            if(supervisors[i]){
-                Teacher.findOneAndUpdate(
-                    {email: supervisors[i].email}, 
-                    {$push: {'supervisorgroup': group._id}}, 
-                    {new: true})
-                .then(result);
-            }
-        }
+        // for(var i=0; i<supervisors.length; i++){
+        //     if(supervisors[i]){
+        //         Teacher.findOneAndUpdate(
+        //             {email: supervisors[i].email}, 
+        //             {$push: {'supervisorgroup': group._id}}, 
+        //             {new: true})
+        //         .then(result);
+        //     }
+        // }
         
         for(var i=0; i<students.length; i++){
             if(students[i]){
-                Student.findOneAndUpdate(
+                Student.update(
                     {email: students[i].email}, 
-                    {$push: {'group': group._id}}, 
+                    {$set: {'group': group._id}}, 
                     {new: true})
                 .then(result);
             }
