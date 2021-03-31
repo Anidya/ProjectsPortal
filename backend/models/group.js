@@ -29,8 +29,12 @@ var groupSchema = new mongoose.Schema({
     deadlines: {
         title: {type: String},
         description: {type: String}
+    },
+    
+    report: {
+        data: Buffer,
+        contentType: String
     }
-
 });
 
 

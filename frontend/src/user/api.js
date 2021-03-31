@@ -32,3 +32,18 @@ export const updateDetails = (groupId, group) => {
     })
     .catch(err => console.log(err));
 }
+
+export const updateDetailsFiles = (groupId, group) => {
+    return fetch(`${process.env.REACT_APP_API_URL}/updategroupfiles/${groupId}` , {
+        method: "PUT",
+        headers: {
+            Accept: "application/json"
+            // "Content-type": "application/json"
+        },
+        body: group
+    })
+    .then(response => {
+        return response.json();
+    })
+    .catch(err => console.log(err));
+}

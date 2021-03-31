@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { load, updateDetails } from './api'
+import { load, updateDetails, updateDetailsFiles } from './api'
 import { isAuthenticated } from '../auth'
 
 class StudentDashborad extends Component{
@@ -7,20 +7,16 @@ class StudentDashborad extends Component{
         super()
         this.state = {
             groupId: "",
-            group : {
-                id: "",
-                mentor: { name: "", email: "" }, 
-                students: [{ name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }],
-                supervisors: [{ name: "", email: "" }, { name: "", email: "" }],
-                fields: { title: "", description: ""},
-                deadlines: { title: "", description: ""}
-            },
+            group : "",
+            report: "",
             current: "",
+            currentFile: "",
             show: false
         }
     }
 
     componentDidMount = () => {
+        this.groupData = new FormData()
         const groupId = isAuthenticated().user.group;
         load(groupId)
         .then(data => {
@@ -29,47 +25,89 @@ class StudentDashborad extends Component{
             else 
                 this.setState({
                     group: data,
-                    groupId: groupId
+                    groupId: groupId,
+                    report: data.report
                 })
         })
     }
  
-    handleClick = (event) => {
-        if(this.state.show){
-            alert("Please Fill in the Required Fields");
-        }
-        else{
-            const value = event.target.value;
-            this.setState({
-                current: value
-            })
-        }
-    }
-
     sidebar = (group) => (
         <div>
             <p style={{fontSize: "20px", textAlign: "center"}}>Projects Details</p>
             <hr className = "line"/>
             
-            { group.deadlines.title !== "" && <button className = "button" value="title" onClick={ (event) => this.handleClick(event)}> Title </button> }
-            { group.deadlines.description !== ""  && <button className = "button" value="description" onClick={ (event) => this.handleClick(event)}>Description</button> }
+            { group.deadlines.title !== "" && <button className = "button" onClick={ this.handleClick("title")}> Title </button> }
+            { group.deadlines.description !== ""  && <button className = "button"  onClick={ this.handleClick("description")}>Description</button> }
+            { group.deadlines.report !== ""  && <button className = "button"  onClick={ this.handleClickFile("report")}>Report</button> }
             
             <hr style={{backgroundColor: "black"}}/>
         </div>
     )
 
-    handleChange = (event) => {
-        const {group} = this.state;
-        group.fields[event.target.name] = event.target.value;
-        this.setState({
-            group: group
-        })
+    handleClick = (str) => event => {
+        if(this.state.show)
+            alert("Please Fill in the Required Fields");
+        else
+            this.setState({ 
+                current: str,
+                currentFile: ""
+            })
     }
 
-    handleEdit = (event) => {
+    handleClickFile = (str) => event => {
+        if(this.state.show)
+            alert("Please Fill in the Required Fields");
+        else
+            this.setState({ 
+                currentFile: str,
+                current: ""
+            })
+    }
+
+    displayFromSidebar = (group, current, show) => (
+        (current && <div className="container">
+            <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}>{current.charAt(0).toUpperCase() + current.slice(1)} of the Project</h4>
+            <h5>{group.fields[current]}</h5>
+            {show && ( 
+                <input className="form-control mt-5" type="text" value={group.fields[current]} name={current} placeholder="ENTER THE DETAILS"  onChange={this.handleChange}></input> 
+            )}
+            { this.checkDeadline() && (<button className="btn btn-raised btn-primary ml-1 mt-4"  value ={group.deadlines[current]} onClick={this.handleEdit}>Edit</button> )}
+            { this.checkDeadline() && (<button className="btn btn-raised btn-primary ml-5 mt-4" onClick={this.handleSave}>Save</button> )}
+        </div> )
+    )
+
+    displayFilesFromSidebar = (group, report, currentFile, show) => (
+        (currentFile && <div className="container">
+            <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}>{currentFile.charAt(0).toUpperCase() + currentFile.slice(1)} of the Project</h4>
+                { show && ( 
+                    <input className="form-control mt-5" type="file" name={currentFile} onChange={this.handleChange}></input>
+                )} 
+            { this.checkDeadline() && (<button className="btn btn-raised btn-primary ml-1 mt-4" value ={group.deadlines[currentFile]} onClick={this.handleEdit}>Edit</button> )}
+            { this.checkDeadline() && (<button className="btn btn-raised btn-primary ml-5 mt-4" onClick={this.handleSave}>Save</button> )}
+        </div> )
+    )
+
+    handleChange = (event) => {
         const {group, current} = this.state;
 
-        let deadline = event.target.value;
+        if(current){
+            group.fields[event.target.name] = event.target.value;
+            this.setState({
+                group: group
+            })
+        }
+        else{
+            const name = event.target.name;
+            const value = event.target.files[0];
+            
+            this.groupData.set(name,value)
+        }
+    }
+
+    checkDeadline = () => {
+        const {group, current, currentFile} = this.state;
+
+        let deadline = (current === "" ? group.deadlines[currentFile] : group.deadlines[current]);
         let today = new Date();
         let date = today.getDate();   
             date = ( date<10 ?  "0"+date.toString()  : date.toString() );
@@ -78,61 +116,53 @@ class StudentDashborad extends Component{
         let year = today.getFullYear();
         today = year.toString() + '-' + month.toString() + '-' + date.toString();
 
-        if(deadline >= today){
+        if(today<=deadline)
+            return true;
+        return false;
+    }
+
+    handleEdit = () => {
+        const {group, current} = this.state;
+        if(current){
             if(group.fields[current] === "--- PROJECT DETAILS NOT UPLOADED ---"){
                 group.fields[current] = "";
                 this.setState({ group: group });
             }
-            this.setState({ show: true});
         }
+        this.setState({ show: true});
     }
 
-    handleSave = () => {
+    handleSave = (event) => {
+        event.preventDefault();
         const {group, groupId, current} = this.state;
 
-        if(group.fields[current] === ""){
-            alert("Please fill in the required fields");
+        if(current){
+            if(group.fields[current] === ""){
+                alert("Please fill in the required fields");
+            }
+            else{
+                updateDetails(groupId, group)
+                .then(data => {
+                    if(data.error)
+                        console.log(data.error);
+                    else
+                        this.setState({
+                            group: data,
+                            show: false
+                        })
+                })
+            }
         }
         else{
-            updateDetails(groupId, group)
+            updateDetailsFiles(groupId, this.groupData)
             .then(data => {
                 if(data.error)
                     console.log(data.error);
                 else
-                    this.setState({
-                        group: data,
-                        show: false
-                    })
+                    console.log("set");
             })
         }
     }
-
-    displayFromSidebar = (group, current, show) => (
-        <div className="container">
-            { current === "title" && ( <div>
-                    <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}>Title of the Project</h4>
-                    <h5>{group.fields.title}</h5>
-                    {show && ( 
-                        <input className="form-control mt-5" type="text" value={group.fields.title} name="title" placeholder="ENTER NEW TITLE" onChange={this.handleChange}></input> 
-                    )}
-                    <button className="btn btn-raised btn-primary ml-1 mt-4"  value ={group.deadlines.title } onClick={this.handleEdit}>Edit</button>
-                    <button className="btn btn-raised btn-primary ml-5 mt-4" onClick={this.handleSave}>Save</button>
-                </div>
-            )}
-
-            { current === "description" && ( <div>
-                    <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}>Description Of Project</h4>
-                    <h5>{group.fields.description}</h5>
-                    {show && ( 
-                        <input className="form-control mt-5" type="text" value={group.fields.description} name="description" placeholder="ENTER NEW DESCRIPTION" onChange={this.handleChange}></input>
-                    )}
-                    <br/>
-                    <button className="btn btn-raised btn-primary ml-1 mt-4"  value ={group.deadlines.description} onClick={this.handleEdit}>Edit</button>
-                    <button className="btn btn-raised btn-primary ml-5 mt-4" onClick={this.handleSave}>Save</button>
-                </div>
-            )}
-        </div>
-    )
 
     mainGroupDetails = group => (
         <div className="container">
@@ -148,31 +178,22 @@ class StudentDashborad extends Component{
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                    <th scope="row">1</th>
-                    <td>{group.students[0].name}</td>
-                    <td>{group.students[0].email}</td>
-                    </tr>
-                    <tr>
-                    <th scope="row">2</th>
-                    <td>{group.students[1].name}</td>
-                    <td>{group.students[1].email}</td>
-                    </tr>
-                    <tr>
-                    <th scope="row">3</th>
-                    <td>{group.students[2].name}</td>
-                    <td>{group.students[2].email}</td>
-                    </tr>
+                    { group.students.map((student, i) => (
+                        <tr key={i}>
+                        <th scope="row">{i+1}</th>
+                        <td>{group.students[i].name}</td>
+                        <td>{group.students[i].email}</td>
+                        </tr>
+                    ))}
                 </tbody>
             </table>
         </div>
     )
 
     render() {
-        const {group, current, show} = this.state
-        return (
-            <div className="row">
-                
+        const {group, current, currentFile, report, show} = this.state
+        return ( 
+            (group && <div className="row"> 
                 <div style={{ paddingTop:"2%", height:"100%", width: "21%", backgroundColor: "teal", position:"fixed"}}>
                     {this.sidebar(group)}
                 </div>
@@ -180,8 +201,9 @@ class StudentDashborad extends Component{
                 <div className="jumbotron" style={{marginLeft: "20%", width: "80%", height: "100%"}}>
                     {this.mainGroupDetails(group)}
                     {this.displayFromSidebar(group, current, show)}
+                    {this.displayFilesFromSidebar(group, report, currentFile, show)}
                 </div>
-            </div>
+            </div>)
         )
     }
 }

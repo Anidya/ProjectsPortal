@@ -1,5 +1,5 @@
 const express = require('express'); 
-const {getGroups, groupById, getOneGroup, createGroup, updateGroup} = require('../controllers/group')
+const {getGroups, groupById, getOneGroup, createGroup, updateGroup, updateGroupFiles} = require('../controllers/group')
 
 const router= express.Router();
 
@@ -7,6 +7,7 @@ router.get('/groups', getGroups);
 router.get('/getgroup/:groupId', getOneGroup);
 router.post('/creategroup', createGroup);
 router.put('/updategroup/:groupId', updateGroup);
+router.put('/updategroupfiles/:groupId', updateGroupFiles);
 
 
 router.param("groupId",groupById);

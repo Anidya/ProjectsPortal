@@ -2,6 +2,8 @@ const Group = require('../models/group');
 const Teacher = require('../models/teacher');
 const Student = require('../models/student');
 const lodash = require('lodash');
+const formidable = require('formidable')
+const fs = require('fs')
 
 exports.groupById = (req,res,next,id) => {
     Group.findById(id)
@@ -71,5 +73,26 @@ exports.updateGroup = (req,res) => {
             return res.status(400).json({error: err});
         res.json(group);
     });
+}
 
+exports.updateGroupFiles = (req,res) => {
+    let form = new formidable.IncomingForm()
+    form.keepExtensions = true
+    form.parse(req, (err, fields, files) => {
+        if(err)
+            return res.status(400).json({err: "Photo could not be loaded"})
+        let group = req.groupDetails
+        group = lodash.extend(group, fields)
+
+        if(files.report){
+            group.report.data = fs.readFileSync(files.report.path)
+            group.report.contentType = files.report.type
+        }
+
+        group.save((err,result) => {
+            if(err)
+                return res.status(400).json({error : err})
+            res.json({group});
+        })
+    }) 
 }

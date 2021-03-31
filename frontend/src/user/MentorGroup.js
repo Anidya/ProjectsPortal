@@ -13,7 +13,7 @@ class MentorGroup extends Component{
                 students: [{ name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }],
                 supervisors: [{ name: "", email: "" }, { name: "", email: "" }],
                 fields: { title: "", description: "", photo: ""},
-                deadlines: { title: "", description: "", photo: ""}
+                deadlines: { title: "", description: "", report: ""}
             },
             current: "",
             show: false,
