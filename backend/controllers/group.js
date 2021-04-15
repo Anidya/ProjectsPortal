@@ -3,7 +3,8 @@ const Teacher = require('../models/teacher');
 const Student = require('../models/student');
 const lodash = require('lodash');
 const formidable = require('formidable')
-const fs = require('fs')
+const fs = require('fs');
+const group = require('../models/group');
 
 exports.groupById = (req,res,next,id) => {
     Group.findById(id)
@@ -24,7 +25,6 @@ exports.getGroups = (req,res) => {
 }
 
 exports.getOneGroup = (req,res) => {
-    //console.log(req.groupDetails);
     return res.json(req.groupDetails);
 }
 
@@ -66,6 +66,7 @@ exports.createGroup = (req,res) => {
 }
 
 exports.updateGroup = (req,res) => {
+    console.log(req.body);
     var group = req.groupDetails;
     group = lodash.extend(group, req.body);
     group.save( (err) => {
@@ -82,11 +83,17 @@ exports.updateGroupFiles = (req,res) => {
         if(err)
             return res.status(400).json({err: "Photo could not be loaded"})
         let group = req.groupDetails
-        group = lodash.extend(group, fields)
+        group.fields = lodash.extend(group.fields, fields)
 
-        if(files.report){
-            group.report.data = fs.readFileSync(files.report.path)
-            group.report.contentType = files.report.type
+        if(files){
+            if(files.report){
+                group.fields.report.data = fs.readFileSync(files.report.path)
+                group.fields.report.contentType = files.report.type
+            }
+            else if(files.synopsis){
+                group.fields.synopsis.data = fs.readFileSync(files.synopsis.path)
+                group.fields.synopsis.contentType = files.synopsis.type
+            }
         }
 
         group.save((err,result) => {
@@ -95,4 +102,12 @@ exports.updateGroupFiles = (req,res) => {
             res.json({group});
         })
     }) 
+}
+
+exports.getReport = (req, res) => {
+    return res.send(req.groupDetails.fields.report.data)
+}
+
+exports.getSynopsis = (req, res) => {
+    return res.send(req.groupDetails.fields.synopsis.data)
 }

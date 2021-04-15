@@ -28,10 +28,13 @@ class Mentorship extends Component{
                     <div className="card" style={{height: "400px", width: "350px", marginLeft: 250, marginTop: 50}} key={i}>
                         <div className="card-body" >
                             <p className="card-title" style={{fontWeight: 400, fontSize: 26, marginLeft: 68}}>{group.id}</p>
-                            <p className="card-text" style = {{fontWeight: 400, fontSize: 16}}>Students:</p>
-                            <p className="card-text" style = {{fontWeight: 400, fontSize: 16}}>{group.students[0].name}</p>
-                            <p className="card-text" style = {{fontWeight: 400, fontSize: 16}}>{group.students[1].name}</p>
-                            <p className="card-text" style = {{fontWeight: 400, fontSize: 16}}>{group.students[2].name}</p>
+                            <h5>Students:</h5>
+                            { group.students.map((student, k) => (
+                                <div key={k}>
+                                <p> {student.name} </p>
+                                <p> {student.email} </p>
+                                </div>
+                            ))}
                             <Link to={`/mentor/${group._id}`} className="btn btn-raised btn-primary btn-sm" style = {{marginLeft: 90, marginTop: 25, fontWeight: 400, fontSize: 16}}>View Group</Link>
                         </div>
                     </div>

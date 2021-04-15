@@ -7,10 +7,7 @@ class AdminDashboard extends Component{
         this.state = {
             id: "",
             
-            mentor: {
-                name: "",
-                email: ""
-            },
+            mentor: { name: "", email: "" },
             
             students: [
                 {    name: "", email: "" },
@@ -21,15 +18,13 @@ class AdminDashboard extends Component{
                 {   name: "", email: "" },
                 {   name: "", email: "" }
             ],
-            fields: {
-                title: "",
-                description: ""
-            },
+            fields: { title: "", description: "", tech: "", report: "", synopsis: ""},
+            deadlines: { title: "", description: "", tech: "", report: "", synopsis: ""},
+            
             error: "",
             open: false
         }
     }
-
     
     handleChange = (str) => (event) => {
         this.setState({ 
@@ -83,17 +78,16 @@ class AdminDashboard extends Component{
         });
     }
 
-
-
     clickSubmit = (event) => {
         event.preventDefault();
-        const {id, mentor, students, supervisors, fields} = this.state
+        const {id, mentor, students, supervisors, fields, deadlines} = this.state
         const group = {
             id: id,
             mentor: mentor,
             students: students,
             supervisors: supervisors,
-            fields: fields
+            fields: fields,
+            deadlines: deadlines
         }
         createGroup(group)
             .then(data => {
@@ -120,7 +114,6 @@ class AdminDashboard extends Component{
         });
     };
     
-
     groupForm = (id,mentor,students,supervisors) => (
         <form>
             <div className="form-group">
@@ -276,7 +269,6 @@ class AdminDashboard extends Component{
         </form>
           
     )
-
 
     render() {
         const {id,mentor,students,supervisors,error,open} = this.state;

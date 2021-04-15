@@ -1,28 +1,24 @@
 import React, { Component } from 'react'
-import { load, updateDetails } from './api'
+import { load, updateDetails} from './api'
 import '../design/app.css'
+import FileViewer from 'react-file-viewer';
+import DefaultPDF from '../files/DefaultPDF.jpg'
 
 class MentorGroup extends Component{
     constructor(){
         super()
         this.state = {
             groupId: "",
-            group : {
-                id: "",
-                mentor: { name: "", email: "" }, 
-                students: [{ name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }],
-                supervisors: [{ name: "", email: "" }, { name: "", email: "" }],
-                fields: { title: "", description: "", photo: ""},
-                deadlines: { title: "", description: "", report: ""}
-            },
+            group : "",
             current: "",
+            currentFile: "",
             show: false,
-            date: "",
-            time: "",
+            date: ""
         }
     }
 
     componentDidMount = () => {
+        this.groupData = new FormData()
         const groupId = this.props.match.params.groupId;
         load(groupId)
         .then(data => {
@@ -33,14 +29,6 @@ class MentorGroup extends Component{
                     group: data,
                     groupId: groupId
                 })
-        })
-    }
-
-    handleClick = (event, show) => {
-        const value = event.target.value;
-        this.setState({
-            current: value,
-            show: show
         })
     }
 
@@ -67,7 +55,6 @@ class MentorGroup extends Component{
                 <button className="randombutton ml-5" onClick={this.closeDialog}>Close</button>
                 <button className="randombutton" onClick={this.assignTask}>Assign</button>
             </section>
-
         </div>)
     )
     
@@ -76,20 +63,35 @@ class MentorGroup extends Component{
                 <p style={{fontSize: "20px", textAlign: "center"}}>Projects Details</p>
                 <hr className = "line"/>
                 
-                { group.fields.title !== "" && <button className = "button" value="title" onClick={ (event) => this.handleClick(event, false)}> Title </button> }
-                { group.fields.description !== ""  && <button className = "button" value="description" onClick={ (event) => this.handleClick(event, false)}>Description</button> }
-                
+                { group.deadlines.title !== "" && <button className = "button" value="title" onClick={ (event) => this.handleClick(event, false, false)}> Title </button> }
+                { group.deadlines.description !== ""  && <button className = "button" value="description" onClick={ (event) => this.handleClick(event, false, false)}>Description</button> }
+                { group.deadlines.tech   && <button className = "button" value="tech" onClick={ (event) => this.handleClick(event, false, false)}>Technology Used</button> }
+                { group.deadlines.synopsis   && <button className = "button" value="synopsis" onClick={ (event) => this.handleClick(event, false, true)}>Synopsis</button> }
+                { group.deadlines.report   && <button className = "button" value="report" onClick={ (event) => this.handleClick(event, false, true)}>Report</button> }
+
+
                 <hr style={{backgroundColor: "black"}}/>
-                
                 <p style={{fontSize: "20px", textAlign: "center" }} >Assign Task</p>
                 <hr className = "line"/>
                 
-                { group.fields.title === "" && <button className = "button" value="title" onClick= { (event) => this.handleClick(event, true)}> Title </button> }
-                { group.fields.description === "" && <button className = "button" value="description" onClick={ (event) => this.handleClick(event, true)}>Description</button> }
-                
+                { !group.deadlines.title && <button className = "button" value="title" onClick= { (event) => this.handleClick(event, true, false)}> Title </button> }
+                { !group.deadlines.description && <button className = "button" value="description" onClick={ (event) => this.handleClick(event, true, false)}>Description</button> }
+                { !group.deadlines.tech && <button className = "button" value="tech" onClick={ (event) => this.handleClick(event, true, false)}>Technology Used</button> }
+                { !group.deadlines.synopsis   && <button className = "button" value="synopsis" onClick={ (event) => this.handleClick(event, true, true)}>Synopsis</button> }
+                { !group.deadlines.report   && <button className = "button" value="report" onClick={ (event) => this.handleClick(event, true, true)}>Report</button> }
+
                 <hr style={{backgroundColor: "black"}}/>
             </div>
     )
+
+    handleClick = (event, show, file) => {
+        const value = event.target.value;
+
+        if(file)    
+            this.setState({ currentFile: value,  show: show, current: "" })
+        else
+            this.setState({ current: value,  show: show, currentFile: "" })
+    }
 
     mainGroupDetails = group => (
         <div className="container">
@@ -105,37 +107,33 @@ class MentorGroup extends Component{
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                    <th scope="row">1</th>
-                    <td>{group.students[0].name}</td>
-                    <td>{group.students[0].email}</td>
-                    </tr>
-                    <tr>
-                    <th scope="row">2</th>
-                    <td>{group.students[1].name}</td>
-                    <td>{group.students[1].email}</td>
-                    </tr>
-                    <tr>
-                    <th scope="row">3</th>
-                    <td>{group.students[2].name}</td>
-                    <td>{group.students[2].email}</td>
-                    </tr>
+                    { group.students.map((student, i) => (
+                        <tr key={i}>
+                        <th scope="row">{i+1}</th>
+                        <td>{group.students[i].name}</td>
+                        <td>{group.students[i].email}</td>
+                        </tr>
+                    ))}
                 </tbody>
             </table>
         </div>
     )
 
-    displayFromSidebar = (group, current) => (
+    displayFromSidebar = (group, current, currentFile) => (
         <div>
-            { current === "title" &&  group.fields.title !== "" &&  ( <div>
-                    <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}>Title of the Project</h4>
-                    <h5>{group.fields.title}</h5>
+            { current && group.fields[current] &&  ( <div>
+                    <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}>{current.charAt(0).toUpperCase() + current.slice(1)}</h4>
+                    <h5>{group.fields[current]}</h5>
                 </div>
             )}
-
-            { current === "description" && group.fields.description !== "" && ( <div>
-                    <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}>Description Of Project</h4>
-                    <h5>{group.fields.description} </h5>
+            { currentFile &&  ( 
+                <div>
+                    <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}>{currentFile.charAt(0).toUpperCase() + currentFile.slice(1)} of the Project</h4>
+                    { group.fields[currentFile] ? (
+                        <FileViewer fileType="pdf" filePath={`http://localhost:9090/${currentFile}/${group._id}`}/> 
+                        ) : (
+                        <h5>--- PROJECT DETAILS NOT UPLOADED ---</h5>    
+                        )}
                 </div>
             )}
         </div>
@@ -149,16 +147,14 @@ class MentorGroup extends Component{
     };
 
     assignTask = () => {
-        const {groupId, group, current, date} = this.state;
+        const {groupId, group, current, currentFile, date} = this.state;
 
-        if(current === "title"){
-            group.fields.title = "--- PROJECT DETAILS NOT UPLOADED ---";
-            group.deadlines.title = date;
+        if(current){
+            group.fields[current] = "--- PROJECT DETAILS NOT UPLOADED ---";
+            group.deadlines[current] = date;
         }
-        if(current === "description"){
-            group.fields.description = "--- PROJECT DETAILS NOT UPLOADED ---";
-            group.deadlines.description = date;
-        }
+        else
+            group.deadlines[currentFile] = date;
 
         this.setState({
             group
@@ -179,9 +175,9 @@ class MentorGroup extends Component{
     }
     
     render() {
-        const {group, current, show, date} = this.state
+        const {group, current, currentFile, show, date} = this.state
         return (
-            <div className="row">
+            (group && <div className="row">
                 
                 <div style={{ paddingTop:"2%", height:"100%", width: "21%", backgroundColor: "teal", position:"fixed"}}>
                     {this.sidebar(group)}
@@ -189,10 +185,10 @@ class MentorGroup extends Component{
 
                 <div className="jumbotron" style={{marginLeft: "20%", width: "80%", height: "100%"}}>
                     {this.mainGroupDetails(group)}
-                    {this.displayFromSidebar(group, current)}
+                    {this.displayFromSidebar(group, current, currentFile)}
                     {show && this.dialog(date)}
                 </div>
-            </div>
+            </div>)
         )
     }
 }

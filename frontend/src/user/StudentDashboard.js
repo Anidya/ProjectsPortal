@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
-import { load, updateDetails, updateDetailsFiles } from './api'
+import { load, updateDetailsFiles } from './api'
 import { isAuthenticated } from '../auth'
+import FileViewer from 'react-file-viewer';
+
 
 class StudentDashborad extends Component{
     constructor(){
@@ -8,10 +10,10 @@ class StudentDashborad extends Component{
         this.state = {
             groupId: "",
             group : "",
-            report: "",
             current: "",
             currentFile: "",
-            show: false
+            show: false,
+            showFile: false
         }
     }
 
@@ -36,70 +38,77 @@ class StudentDashborad extends Component{
             <p style={{fontSize: "20px", textAlign: "center"}}>Projects Details</p>
             <hr className = "line"/>
             
-            { group.deadlines.title !== "" && <button className = "button" onClick={ this.handleClick("title")}> Title </button> }
-            { group.deadlines.description !== ""  && <button className = "button"  onClick={ this.handleClick("description")}>Description</button> }
-            { group.deadlines.report !== ""  && <button className = "button"  onClick={ this.handleClickFile("report")}>Report</button> }
+            { group.deadlines.title && <button className = "button" onClick={ this.handleClick("title", false)}> Title </button> }
+            { group.deadlines.description && <button className = "button"  onClick={ this.handleClick("description", false)}>Description</button> }
+            { group.deadlines.tech && <button className = "button"  onClick={ this.handleClick("tech", false)}>Technology Used</button> }
+            { group.deadlines.synopsis  && <button className = "button"  onClick={ this.handleClick("synopsis", true)}>Synopsis</button> }
+            { group.deadlines.report  && <button className = "button"  onClick={ this.handleClick("report", true)}>Report</button> }
             
             <hr style={{backgroundColor: "black"}}/>
         </div>
     )
 
-    handleClick = (str) => event => {
+    handleClick = (str, file) => event => {
         if(this.state.show)
             alert("Please Fill in the Required Fields");
-        else
-            this.setState({ 
-                current: str,
-                currentFile: ""
-            })
+        else{
+            if(!file)
+                this.setState({  current: str,  currentFile: "", showFile: false  });
+            else
+                this.setState({  currentFile: str,  current: "", showFile: false  });
+        }
     }
 
-    handleClickFile = (str) => event => {
-        if(this.state.show)
-            alert("Please Fill in the Required Fields");
-        else
-            this.setState({ 
-                currentFile: str,
-                current: ""
-            })
-    }
-
-    displayFromSidebar = (group, current, show) => (
-        (current && <div className="container">
-            <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}>{current.charAt(0).toUpperCase() + current.slice(1)} of the Project</h4>
-            <h5>{group.fields[current]}</h5>
-            {show && ( 
-                <input className="form-control mt-5" type="text" value={group.fields[current]} name={current} placeholder="ENTER THE DETAILS"  onChange={this.handleChange}></input> 
-            )}
-            { this.checkDeadline() && (<button className="btn btn-raised btn-primary ml-1 mt-4"  value ={group.deadlines[current]} onClick={this.handleEdit}>Edit</button> )}
-            { this.checkDeadline() && (<button className="btn btn-raised btn-primary ml-5 mt-4" onClick={this.handleSave}>Save</button> )}
-        </div> )
+    renderFile = (currentFile, group) => (
+        ( group.fields[currentFile] ? <FileViewer 
+            fileType="pdf"
+            filePath={`http://localhost:9090/${currentFile}/${group._id}`}
+        /> : <div>*No File Uploaded*</div>)
     )
 
-    displayFilesFromSidebar = (group, report, currentFile, show) => (
-        (currentFile && <div className="container">
-            <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}>{currentFile.charAt(0).toUpperCase() + currentFile.slice(1)} of the Project</h4>
-                { show && ( 
-                    <input className="form-control mt-5" type="file" name={currentFile} onChange={this.handleChange}></input>
-                )} 
-            { this.checkDeadline() && (<button className="btn btn-raised btn-primary ml-1 mt-4" value ={group.deadlines[currentFile]} onClick={this.handleEdit}>Edit</button> )}
-            { this.checkDeadline() && (<button className="btn btn-raised btn-primary ml-5 mt-4" onClick={this.handleSave}>Save</button> )}
-        </div> )
+    displayFromSidebar = (group, current, currentFile, show, showFile) => (
+        ( current ? ( 
+
+            <div className="container">
+                <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}>{current.charAt(0).toUpperCase() + current.slice(1)} of the Project</h4>
+                <h5>{group.fields[current]}</h5>
+                
+                {show && ( <input className="form-control mt-5" type="text" value={group.fields[current]} name={current} placeholder="ENTER THE DETAILS"  onChange={this.handleChange}></input> )}
+                
+                { this.checkDeadline() && (<button className="btn btn-raised btn-primary ml-1 mt-4"  value ={group.deadlines[current]} onClick={this.handleEdit}>Edit</button> )}
+                { this.checkDeadline() && (<button className="btn btn-raised btn-primary ml-5 mt-4" onClick={this.handleSave}>Save</button> )}
+            </div> 
+
+        ) : (   
+            
+            <div className="container">
+                <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline', marginBottom: "5%"}}>{currentFile.charAt(0).toUpperCase() + currentFile.slice(1)} of the Project</h4>
+                
+                { showFile && this.renderFile(currentFile, group) }
+                { show && ( <input className="form-control mt-5" type="file" name={currentFile} onChange={this.handleChange}></input> )}
+
+                { !showFile && group.fields[currentFile] && (<button className="btn btn-raised btn-primary ml-1 mt-2" onClick={ () => {this.setState({showFile: true})} }>Show</button> )}
+                { this.checkDeadline() && (<button className="btn btn-raised btn-primary ml-5 mt-2" value ={group.deadlines[currentFile]} onClick={this.handleEdit}>Edit</button> )}
+                { this.checkDeadline() && (<button className="btn btn-raised btn-primary ml-5 mt-2" onClick={this.handleSave}>Save</button> )}
+            </div> 
+            )
+        )
     )
 
     handleChange = (event) => {
         const {group, current} = this.state;
 
+        const name = event.target.name;
+        const value = current ? event.target.value : event.target.files[0];
+        console.log(name);
+        
+        this.groupData.set(name,value);
+
         if(current){
-            group.fields[event.target.name] = event.target.value;
+            group.fields[name] = value;
             this.setState({
                 group: group
             })
-        }
-        else{
-            const name = event.target.name;
-            const value = event.target.files[0];
-            
             this.groupData.set(name,value)
         }
     }
@@ -129,37 +138,28 @@ class StudentDashborad extends Component{
                 this.setState({ group: group });
             }
         }
-        this.setState({ show: true});
+        this.setState({ show: true, showFile: false});
     }
 
     handleSave = (event) => {
         event.preventDefault();
         const {group, groupId, current} = this.state;
 
-        if(current){
-            if(group.fields[current] === ""){
-                alert("Please fill in the required fields");
-            }
-            else{
-                updateDetails(groupId, group)
-                .then(data => {
-                    if(data.error)
-                        console.log(data.error);
-                    else
-                        this.setState({
-                            group: data,
-                            show: false
-                        })
-                })
-            }
+        if(group.fields[current] === ""){
+            alert("Please fill in the required fields");
         }
         else{
             updateDetailsFiles(groupId, this.groupData)
             .then(data => {
                 if(data.error)
                     console.log(data.error);
-                else
-                    console.log("set");
+                else{
+                    this.setState({
+                                group: data.group,
+                                show: false,
+                                showFile: false
+                    })
+                }
             })
         }
     }
@@ -191,7 +191,7 @@ class StudentDashborad extends Component{
     )
 
     render() {
-        const {group, current, currentFile, report, show} = this.state
+        const {group, current, currentFile, show, showFile} = this.state
         return ( 
             (group && <div className="row"> 
                 <div style={{ paddingTop:"2%", height:"100%", width: "21%", backgroundColor: "teal", position:"fixed"}}>
@@ -200,8 +200,7 @@ class StudentDashborad extends Component{
 
                 <div className="jumbotron" style={{marginLeft: "20%", width: "80%", height: "100%"}}>
                     {this.mainGroupDetails(group)}
-                    {this.displayFromSidebar(group, current, show)}
-                    {this.displayFilesFromSidebar(group, report, currentFile, show)}
+                    { (current || currentFile) && this.displayFromSidebar(group, current, currentFile, show, showFile)}
                 </div>
             </div>)
         )

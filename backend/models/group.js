@@ -5,6 +5,7 @@ var groupSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    
     mentor: {
         name: {type: String},
         email: {type: String}
@@ -23,17 +24,24 @@ var groupSchema = new mongoose.Schema({
 
     fields: { 
         title: {type: String},
-        description: {type: String}
+        description: {type: String},
+        tech: {type: String},
+        report: {
+            data: Buffer,
+            contentType: String
+        },
+        synopsis: {
+            data: Buffer,
+            contentType: String
+        },
     },
 
     deadlines: {
         title: {type: String},
-        description: {type: String}
-    },
-    
-    report: {
-        data: Buffer,
-        contentType: String
+        description: {type: String},
+        tech: {type: String},
+        report: {type: String},
+        synopsis: {type: String}
     }
 });
 
