@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import { createGroup } from '../group'
+import { createGroup } from './api'
 
 class AdminDashboard extends Component{
     constructor(){

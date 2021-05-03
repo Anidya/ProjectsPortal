@@ -45,6 +45,10 @@ class StudentDashborad extends Component{
             { group.deadlines.report  && <button className = "button"  onClick={ this.handleClick("report", true)}>Report</button> }
             
             <hr style={{backgroundColor: "black"}}/>
+
+            { group.viva && <button className = "button" onClick= { this.handleClick("VIVA", false)}>VIVA</button> }
+                
+            <hr style={{backgroundColor: "black"}}/>
         </div>
     )
 
@@ -68,22 +72,33 @@ class StudentDashborad extends Component{
 
     displayFromSidebar = (group, current, currentFile, show, showFile) => (
         ( current ? ( 
+                current === "VIVA" ?  (
+                <div className="container">
+                    <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}>VIVA</h4>
+                    <p style= {{fontWeight: 'bold', marginLeft: "5%"}} >Scheduled Time and Date : {group.viva}</p>
+                    <button className="btn btn-raised btn-primary ml-4 mt-4">Join Video Call</button> 
+                </div> 
+            ) : (
+                <div className="container">
+                    { current === "tech" ? <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}>Technology Used</h4> :
+                    <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}> {current.charAt(0).toUpperCase() + current.slice(1)}</h4> }
+                    <p style = {{textAlign: "end"}}>Deadline:    {group.deadlines[current]}</p>
 
-            <div className="container">
-                <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}>{current.charAt(0).toUpperCase() + current.slice(1)} of the Project</h4>
-                <h5>{group.fields[current]}</h5>
-                
-                {show && ( <input className="form-control mt-5" type="text" value={group.fields[current]} name={current} placeholder="ENTER THE DETAILS"  onChange={this.handleChange}></input> )}
-                
-                { this.checkDeadline() && (<button className="btn btn-raised btn-primary ml-1 mt-4"  value ={group.deadlines[current]} onClick={this.handleEdit}>Edit</button> )}
-                { this.checkDeadline() && (<button className="btn btn-raised btn-primary ml-5 mt-4" onClick={this.handleSave}>Save</button> )}
-            </div> 
+                    <h5 style={{marginTop: "2%", marginLeft: "1%"}}>{group.fields[current]}</h5>
+                    
+                    {show && ( <input className="form-control mt-5" type="text" value={group.fields[current]} name={current} placeholder="ENTER THE DETAILS"  onChange={this.handleChange}></input> )}
+                    
+                    { this.checkDeadline() && (<button className="btn btn-raised btn-primary ml-1 mt-4"  value ={group.deadlines[current]} onClick={this.handleEdit}>Edit</button> )}
+                    { this.checkDeadline() && (<button className="btn btn-raised btn-primary ml-5 mt-4" onClick={this.handleSave}>Save</button> )}
+                </div>
+            )
 
         ) : (   
             
             <div className="container">
                 <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline', marginBottom: "5%"}}>{currentFile.charAt(0).toUpperCase() + currentFile.slice(1)} of the Project</h4>
-                
+                <p style = {{textAlign: "end"}}>Deadline:    {group.deadlines[currentFile]}</p>
+                    
                 { showFile && this.renderFile(currentFile, group) }
                 { show && ( <input className="form-control mt-5" type="file" name={currentFile} onChange={this.handleChange}></input> )}
 

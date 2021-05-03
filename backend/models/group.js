@@ -42,6 +42,10 @@ var groupSchema = new mongoose.Schema({
         tech: {type: String},
         report: {type: String},
         synopsis: {type: String}
+    },
+
+    viva: {
+        type: String
     }
 });
 

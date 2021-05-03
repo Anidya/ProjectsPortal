@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { load, updateDetails} from './api'
 import '../design/app.css'
 import FileViewer from 'react-file-viewer';
-import DefaultPDF from '../files/DefaultPDF.jpg'
 
 class MentorGroup extends Component{
     constructor(){
@@ -13,6 +12,7 @@ class MentorGroup extends Component{
             current: "",
             currentFile: "",
             show: false,
+            showFile: false,
             date: ""
         }
     }
@@ -81,6 +81,7 @@ class MentorGroup extends Component{
                 { !group.deadlines.report   && <button className = "button" value="report" onClick={ (event) => this.handleClick(event, true, true)}>Report</button> }
 
                 <hr style={{backgroundColor: "black"}}/>
+
             </div>
     )
 
@@ -88,9 +89,9 @@ class MentorGroup extends Component{
         const value = event.target.value;
 
         if(file)    
-            this.setState({ currentFile: value,  show: show, current: "" })
+            this.setState({ currentFile: value,  show: show, current: "", showFile: ""})
         else
-            this.setState({ current: value,  show: show, currentFile: "" })
+            this.setState({ current: value,  show: show, currentFile: "", showFile: "" })
     }
 
     mainGroupDetails = group => (
@@ -119,21 +120,25 @@ class MentorGroup extends Component{
         </div>
     )
 
-    displayFromSidebar = (group, current, currentFile) => (
+    displayFromSidebar = (group, current, currentFile, showFile) => (
         <div>
             { current && group.fields[current] &&  ( <div>
-                    <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}>{current.charAt(0).toUpperCase() + current.slice(1)}</h4>
-                    <h5>{group.fields[current]}</h5>
+                    { current === "tech" ? <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}>Technology Used</h4> :
+                    <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}> {current.charAt(0).toUpperCase() + current.slice(1)}</h4> }
+                    <p style = {{textAlign: "end"}}>Deadline:    {group.deadlines[current]}</p>
+                    <h5 style={{marginTop: "2%", marginLeft: "1%"}}>{group.fields[current]}</h5>
                 </div>
             )}
             { currentFile &&  ( 
                 <div>
-                    <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}>{currentFile.charAt(0).toUpperCase() + currentFile.slice(1)} of the Project</h4>
-                    { group.fields[currentFile] ? (
-                        <FileViewer fileType="pdf" filePath={`http://localhost:9090/${currentFile}/${group._id}`}/> 
-                        ) : (
-                        <h5>--- PROJECT DETAILS NOT UPLOADED ---</h5>    
-                        )}
+                    <h4 style={{marginTop: "5%",fontWeight: 'bold',textDecorationLine: 'underline'}}>{currentFile.charAt(0).toUpperCase() + currentFile.slice(1)}</h4>
+                    <p style = {{textAlign: "end"}}>Deadline:    {group.deadlines[currentFile]}</p>
+                    {showFile && <div className="ml-4"> <FileViewer fileType="pdf" filePath={`http://localhost:9090/${currentFile}/${group._id}`}/> </div>}
+                    
+                    { group.fields[currentFile] ? <div> 
+                        { !showFile && <button className="btn btn-raised btn-primary ml-4 mt-4" onClick = {event => this.setState({showFile: true}) }>Display File</button> } </div>
+                        :   <h5 style={{marginTop: "2%", marginLeft: "1%"}}>--- PROJECT DETAILS NOT UPLOADED ---</h5>    
+                    }
                 </div>
             )}
         </div>
@@ -175,7 +180,7 @@ class MentorGroup extends Component{
     }
     
     render() {
-        const {group, current, currentFile, show, date} = this.state
+        const {group, current, currentFile, show, date, showFile} = this.state
         return (
             (group && <div className="row">
                 
@@ -185,7 +190,7 @@ class MentorGroup extends Component{
 
                 <div className="jumbotron" style={{marginLeft: "20%", width: "80%", height: "100%"}}>
                     {this.mainGroupDetails(group)}
-                    {this.displayFromSidebar(group, current, currentFile)}
+                    {this.displayFromSidebar(group, current, currentFile, showFile)}
                     {show && this.dialog(date)}
                 </div>
             </div>)

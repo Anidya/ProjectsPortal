@@ -35,21 +35,21 @@ exports.createGroup = (req,res) => {
     group.save()
     .then( result => {
 
-        // Teacher.findOneAndUpdate(
-        //     {email: mentor.email}, 
-        //     {$push: {'mentorgroup': group._id}}, 
-        //     {new: true})
-        // .then(result);
+        Teacher.findOneAndUpdate(
+            {email: mentor.email}, 
+            {$push: {'mentorgroup': group._id}}, 
+            {new: true})
+        .then(result);
 
-        // for(var i=0; i<supervisors.length; i++){
-        //     if(supervisors[i]){
-        //         Teacher.findOneAndUpdate(
-        //             {email: supervisors[i].email}, 
-        //             {$push: {'supervisorgroup': group._id}}, 
-        //             {new: true})
-        //         .then(result);
-        //     }
-        // }
+        for(var i=0; i<supervisors.length; i++){
+            if(supervisors[i]){
+                Teacher.findOneAndUpdate(
+                    {email: supervisors[i].email}, 
+                    {$push: {'supervisorgroup': group._id}}, 
+                    {new: true})
+                .then(result);  
+            }
+        }
         
         for(var i=0; i<students.length; i++){
             if(students[i]){
@@ -66,7 +66,6 @@ exports.createGroup = (req,res) => {
 }
 
 exports.updateGroup = (req,res) => {
-    console.log(req.body);
     var group = req.groupDetails;
     group = lodash.extend(group, req.body);
     group.save( (err) => {

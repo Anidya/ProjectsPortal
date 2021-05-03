@@ -20,8 +20,20 @@ const Menu = ({history}) => (
                 <div className="collapse navbar-collapse" id="navbarNav">
                     <ul className = "navbar-nav navbar-nav ">
                         <li className = "nav-item">
-                            <Link className = "nav-link" style={isActive(history, `/teacherdashboard`)} to="/teacherdashboard">Dashboard</Link>
+                            { !isAuthenticated().teacher && <Link 
+                                className = "nav-link" style={isActive(history, `/studentdashboard`)} to="/studentdashboard">Dashboard</Link> }
                         </li>
+                        {isAuthenticated().teacher && (
+                            <li className = "nav-item">
+                                <Link className = "nav-link" style={isActive(history, `/mentorgroups/${isAuthenticated().user._id}`)} to={`/mentorgroups/${isAuthenticated().user._id}`}>Mentor</Link>
+                            </li>  
+                        )}
+                        {isAuthenticated().teacher && (
+                            <li className = "nav-item">
+                                <Link className = "nav-link" style={isActive(history, `/supervisorgroups/${isAuthenticated().user._id}`)} to={`/supervisorgroups/${isAuthenticated().user._id}`}>Supervisor</Link>
+                            </li>  
+                        )}
+                        
                     </ul>
                     <ul className = "navbar-nav navbar-nav ml-auto">
                         <li className = "nav-item" >

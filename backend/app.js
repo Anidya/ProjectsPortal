@@ -21,15 +21,13 @@ mongoose.set('useFindAndModify', false);
 const authRoutes = require('./routes/auth');
 const groupRoutes = require('./routes/group');
 
-
 app.use(cors())
 app.use(morgan('dev'));
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mb'}));
 app.use(cookieParser());
 app.use(expressValidator());
 app.use('/', authRoutes);
 app.use('/', groupRoutes);
-
 
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
